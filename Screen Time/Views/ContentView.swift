@@ -15,6 +15,8 @@ private let logger = Logger(subsystemName: "ContentView", category: "View")
 struct ContentView: View {
     @StateObject private var manager = ShieldViewModel()
     
+    @Environment(\.scenePhase) private var scenePhase
+    
     var body: some View {
         NavigationStack {
             ShieldView()
@@ -22,6 +24,11 @@ struct ContentView: View {
         .environmentObject(manager)
         .task(id: "requestAuthorizationTaskID") {
             await manager.requestAuthorization()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                manager.refreshPendingRequests()
+            }
         }
     }
 }
